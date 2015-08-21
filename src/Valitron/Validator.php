@@ -65,6 +65,13 @@ class Validator
     protected $validUrlPrefixes = array('http://', 'https://', 'ftp://');
 
     /**
+     * IF TRUE the validator will collect only first errors for fields
+     *
+     * @var bool
+     */
+    protected $collectFirstErrorsOnly;
+
+    /**
      * Setup validation
      *
      * @param  array                     $data
@@ -123,6 +130,16 @@ class Validator
         }
 
         return static::$_langDir ?: dirname(dirname(__DIR__)) . '/lang';
+    }
+
+    /**
+     * To collect first errors only you should set TRUE
+     *
+     * @param boolean $val
+     */
+    public function setCollectFirstErrorsOnly($val)
+    {
+        $this->collectFirstErrorsOnly = $val;
     }
 
     /**
@@ -855,7 +872,11 @@ class Validator
     {
         foreach ($this->_validations as $v) {
             foreach ($v['fields'] as $field) {
-                 list($values, $multiple) = $this->getPart($this->_fields, explode('.', $field));
+
+                if ($this->collectFirstErrorsOnly && array_key_exists($field, $this->_errors))
+                    continue;
+
+                list($values, $multiple) = $this->getPart($this->_fields, explode('.', $field));
 
                 // Don't validate if the field is not required and the value is empty
                 if ($v['rule'] !== 'required' && !$this->hasRule('required', $field) && (! isset($values) || $values === '' || ($multiple && count($values) == 0))) {

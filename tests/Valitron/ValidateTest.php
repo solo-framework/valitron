@@ -1025,6 +1025,42 @@ class ValidateTest extends BaseTestCase
       $this->assertFalse($v->validate());
     }
 
+    public function testCollectFirstErrorsOnly()
+    {
+        $data = [
+            "key" => ""
+        ];
+
+
+        // collect the first errors only
+        $v = new Validator($data);
+        $v->setCollectFirstErrorsOnly(true);
+
+        $v->rule("required", ["key"])->message("is_required");
+        $v->rule("equals", "key", "expected_value")->message("is_not_equals");
+        $res = $v->validate();
+        $errors = $v->errors();
+
+        $this->assertEquals(1, count($errors["key"]), "it must contains only the first error");
+        $this->assertEquals("is_required", $errors["key"][0], "it must contains 'is_not_equals' message");
+
+        // collect all errors
+        $v = new Validator($data);
+        $v->setCollectFirstErrorsOnly(false); // it is FALSE by default
+
+        $v->rule("required", ["key"])->message("is_required");
+        $v->rule("equals", "key", "expected_value")->message("is_not_equals");
+
+        $res = $v->validate();
+        $errors = $v->errors();
+
+        $this->assertEquals(2, count($errors["key"]), "it must contains only the first error");
+        $this->assertEquals("is_required", $errors["key"][0], "it must contains 'is_required' message");
+        $this->assertEquals("is_not_equals", $errors["key"][1], "it must contains 'is_not_equals' message");
+
+        $this->assertFalse($res);
+    }
+
 }
 
 function sampleFunctionCallback($field, $value, array $params) {
