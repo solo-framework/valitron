@@ -65,11 +65,11 @@ class Validator
     protected $validUrlPrefixes = array('http://', 'https://', 'ftp://');
 
     /**
-     * IF TRUE the validator will collect only first errors for fields
+     * IF TRUE the validator will stop checking rules when the first error occurred
      *
      * @var bool
      */
-    protected $collectFirstErrorsOnly;
+    protected $stopOnError;
 
     /**
      * Setup validation
@@ -133,13 +133,14 @@ class Validator
     }
 
     /**
-     * To collect first errors only you should set TRUE
+     * Set TRUE to stop checking rules after the first error
+     * You can use it to collect first errors only
      *
      * @param boolean $val
      */
-    public function setCollectFirstErrorsOnly($val)
+    public function stopOnError($val)
     {
-        $this->collectFirstErrorsOnly = $val;
+        $this->stopOnError = $val;
     }
 
     /**
@@ -873,7 +874,7 @@ class Validator
         foreach ($this->_validations as $v) {
             foreach ($v['fields'] as $field) {
 
-                if ($this->collectFirstErrorsOnly && array_key_exists($field, $this->_errors))
+                if ($this->stopOnError && array_key_exists($field, $this->_errors))
                     continue;
 
                 list($values, $multiple) = $this->getPart($this->_fields, explode('.', $field));

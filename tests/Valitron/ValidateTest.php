@@ -1034,7 +1034,7 @@ class ValidateTest extends BaseTestCase
 
         // collect the first errors only
         $v = new Validator($data);
-        $v->setCollectFirstErrorsOnly(true);
+        $v->stopOnError(true);
 
         $v->rule("required", ["key"])->message("is_required");
         $v->rule("equals", "key", "expected_value")->message("is_not_equals");
@@ -1046,7 +1046,7 @@ class ValidateTest extends BaseTestCase
 
         // collect all errors
         $v = new Validator($data);
-        $v->setCollectFirstErrorsOnly(false); // it is FALSE by default
+        $v->stopOnError(false); // it is FALSE by default
 
         $v->rule("required", ["key"])->message("is_required");
         $v->rule("equals", "key", "expected_value")->message("is_not_equals");
