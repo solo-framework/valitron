@@ -133,6 +133,7 @@ V::lang('ar');
  * `contains` - Field is a string and contains the given string
  * `creditCard` - Field is a valid credit card number
  * `instanceOf` - Field contains an instance of the given class
+ * `optional` - Value does not need to be included in data array. If it is however, it must pass validation.
 
 **NOTE**: If you are comparing floating-point numbers with min/max validators, you
 should install the [BCMath](http://us3.php.net/manual/en/book.bc.php)
@@ -182,10 +183,33 @@ case of an error. The callback provided should return boolean true or
 false.
 
 ```php
-Valitron\Validator::addRule('alwaysFail', function($field, $value, array $params) {
+Valitron\Validator::addRule('alwaysFail', function($field, $value, array $params, array $fields) {
     return false;
 }, 'Everything you do is wrong. You fail.');
 ```
+
+You can also use one-off rules that are only valid for the specified
+fields. 
+
+```php
+$v = new Valitron\Validator(array("foo" => "bar"));
+$v->rule(function($field, $value, $params, $fields) {
+    return true;
+}, "foo")->message("{field} failed...");
+```
+
+This is useful because such rules can have access to variables
+defined in the scope where the `Validator` lives. The Closure's
+signature is identical to `Validator::addRule` callback's
+signature. 
+
+If you wish to add your own rules that are not static (i.e.,
+your rule is not static and available to call `Validator` 
+instances), you need to use `Validator::addInstanceRule`. 
+This rule will take the same parameters as 
+`Validator::addRule` but it has to be called on a `Validator`
+instance.
+
 
 ## Alternate syntax for adding rules
 

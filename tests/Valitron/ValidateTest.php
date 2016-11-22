@@ -1025,6 +1025,68 @@ class ValidateTest extends BaseTestCase
       $this->assertFalse($v->validate());
     }
 
+    /**
+     * @dataProvider dataProviderFor_testError
+     */
+    public function testError($expected, $input, $test, $message)
+    {
+        $v = new Validator(array('test' => $input));
+        $v->error('test', $message, $test);
+
+        $this->assertEquals(array('test' => array($expected)), $v->errors());
+    }
+
+    public function dataProviderFor_testError()
+    {
+        return array(
+            array(
+                'expected' => 'Test must be at least 140 long',
+                'input'    => 'tweeet',
+                'test'     => array(140),
+                'message'  => '{field} must be at least %d long',
+            ),
+            array(
+                'expected' => 'Test must be between 1 and 140 characters',
+                'input'    => array(1, 2, 3),
+                'test'     => array(1, 140),
+                'message'  => 'Test must be between %d and %d characters',
+            ),
+        );
+    }
+
+    public function testOptionalProvidedValid()
+    {
+        $v = new Validator(array('address' =>  'user@example.com'));
+        $v->rule('optional', 'address')->rule('email', 'address');
+        $this->assertTrue($v->validate());
+    }
+
+    public function testOptionalProvidedInvalid()
+    {
+        $v = new Validator(array('address' =>  'userexample.com'));
+        $v->rule('optional', 'address')->rule('email', 'address');
+        $this->assertFalse($v->validate());
+    }
+
+    public function testOptionalNotProvided()
+    {
+        $v = new Validator(array());
+        $v->rule('optional', 'address')->rule('email', 'address');
+        $this->assertTrue($v->validate());
+    }
+
+    public function testWithData()
+    {
+        $v = new Validator(array());
+        $v->rule('required', 'name');
+        //validation failed, so must have errors
+        $this->assertFalse($v->validate());
+        $this->assertNotEmpty($v->errors());
+        //create copy with different data
+        $v2 = $v->withData(array('name' => 'Chester Tester'));
+        $this->assertTrue($v2->validate());
+        $this->assertEmpty($v2->errors());
+    }
     public function testCollectFirstErrorsOnly()
     {
         $data = [
